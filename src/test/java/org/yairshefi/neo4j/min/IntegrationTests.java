@@ -19,7 +19,9 @@ import org.neo4j.harness.TestServerBuilders;
 import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.function.Function;
 
@@ -77,4 +79,51 @@ public class IntegrationTests {
         assertEquals("Morpheus", parsedResponse.read("$.results[1].data[2].row[0].name"));
     }
 
+    @Test
+    public void testComplexExample() throws IOException {
+
+        JSONObject stmtsJson = StatementsJsonBuilder.create()
+
+                /* First, a non-parameterized simple CQL
+                   - creating a User named Neo that chose the blue pill */
+                .statement("CREATE (Neo:User {name: 'Neo', pill: 'blue'})")
+
+                /* Parameterizing CREATE CQL props
+                   - creating a User named Morpheus that chose the blue pill
+                   - and a User named Neo that chose the red pill
+                 */
+                .statement("CREATE (Morpheus:User {createMorpheusProps}), (Neo2:User {createNeoProps})")
+                    /* params always apply ONLY to the last statement added to the builder */
+                .param("createMorpheusProps", "name", "Morpheus")
+                .param("createMorpheusProps", "pill", "blue")
+                .param("createNeoProps", "name", "Neo")
+                .param("createNeoProps", "pill", "red")
+
+                /* Merge propsMap into all Users:
+                   - equivalent to the CQL: MERGE (u:User) SET u += {team: 'matrix', type: 'humans', canFly: true} */
+                .statement("MERGE (u:User) SET u += {propsMap}")
+                .param("propsMap", "team", "matrix")
+                .param("propsMap", "type", "humans")
+                .param("propsMap", "canFly", true)
+
+                /* Parameterizing specific values in MERGE:
+                        (explicitly indicating parameter names is a Neo4j's constraint, see
+                        http://neo4j.com/docs/developer-manual/current/cypher/#merge-using-map-parameters-with-merge ).
+                   - selecting the User Neo that chose the blue pill: */
+                .statement("MERGE (u:User {name: {matchParams}.name, pill: {matchParams}.pill}) RETURN u")
+                .param("matchParams", "name", "Neo")
+                .param("matchParams", "pill", "blue")
+
+                .build();
+
+        final JSONObject response = neo4jClient.post(stmtsJson);
+
+        final DocumentContext parsedResponse = jsonParser.parse(response);
+
+        assertEquals("Neo", parsedResponse.read("$.results[3].data[0].row[0].name"));
+        assertEquals("blue", parsedResponse.read("$.results[3].data[0].row[0].pill"));
+        assertEquals("matrix", parsedResponse.read("$.results[3].data[0].row[0].team"));
+        assertEquals("humans", parsedResponse.read("$.results[3].data[0].row[0].type"));
+        assertEquals(true, parsedResponse.read("$.results[3].data[0].row[0].canFly"));
+    }
 }
