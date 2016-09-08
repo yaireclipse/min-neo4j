@@ -45,4 +45,11 @@
         </dependency>
 
     </dependencies>
+
+    <contributors>
+        <contributor>
+            <email>yair.eclipse@gmail.com</email>
+            <name>Yair Shefi</name>
+        </contributor>
+    </contributors>
 </project>
