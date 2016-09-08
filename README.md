@@ -8,7 +8,7 @@ After using [Spring Data Neo4j client](https://neo4j.com/developer/spring-data-n
 As this code base is quite initial, it's currently unsafe. DON'T USE IT IN PRODUCTION. As it is now, it's good for quickly hacking stuff and speeding complex queries and commits :)
 
 ## Usage
-
+Full class example [available here](https://github.com/yaireclipse/min-neo4j/blob/master/src/main/java/org/yairshefi/neo4j/min/examples/SimpleExample.java) and tested in [IntegrationTests.java#testComplexExample()](https://github.com/yaireclipse/min-neo4j/blob/master/src/test/java/org/yairshefi/neo4j/min/IntegrationTests.java).
 ````java
         /** 1. Create a client **/
         final Neo4jClient neo4jClient =
