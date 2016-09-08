@@ -56,3 +56,5 @@ Full class example [available here](https://github.com/yaireclipse/min-neo4j/blo
         /** 3. Post it to Neo4j sever! **/
         final JSONObject response = neo4jClient.post(stmtsJson);
 ````
+## License
+Licensed under [MIT License](https://raw.githubusercontent.com/jenkinsci/jenkins/master/LICENSE.txt)
